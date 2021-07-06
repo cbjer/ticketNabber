@@ -24,10 +24,15 @@ def getTicketNameFromTag(tag):
     names = []
     for classType in CLASS_TYPES:
         names += tag.find_all('div', attrs={'class' : classType})
-    assert(len(names) == 1)
+
+    if len(names) != 1:
+        raise AssertionError("More than 1 name found in tag")
+
     uniqueName = names[0]
 
-    assert(len(uniqueName.contents) == 1)
+    if len(uniqueName.contents) != 1:
+        raise AssertionError("More than 1 ticket name found in tag")
+
     return uniqueName.contents[0]
 
 def isTicketNotClosed(tag):
@@ -46,8 +51,10 @@ def getEventCode(eventUrlString):
     s = eventUrlString.split('/')
     s = [i for i in s if i != '']
     eventCode = s[-1]
-    assert(len(eventCode) == EVENT_CODE_LENGTH)
 
+    if len(eventCode) != EVENT_CODE_LENGTH:
+        raise AssertionError("Event code not expected length", eventCode)
+    
     return eventCode
 
 def getTicketWidgetUrl(eventCode):
@@ -77,5 +84,12 @@ def filterAvailableTickets(ticketNamesStatus, ignoreTickets):
     return goodTickets
 
 def checkCorrectTicketsReturned(ticketTags, expectedNumberTickets):
-    assert(len(ticketTags) == expectedNumberTickets)
+    if len(ticketTags) != expectedNumberTickets:
+        raise AssertionError("Error with number of tickets returned. Expected: ", expectedNumberTickets, " Number Returned: ", len(ticketTags))
+
+def parseTicketDictionary(ticketDetailDict):
+    url = ticketDetailDict['url']
+    ignoreTickets = ticketDetailDict['ignoreTickets']
+    expectedNumberTickets = ticketDetailDict['expectedNumberTickets']
+    return url, ignoreTickets, expectedNumberTickets
 

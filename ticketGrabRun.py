@@ -2,7 +2,7 @@
 Main file for running the ticket grab
 """
 from ticketDetails import TICKETS
-from ticketGrabUtils import getAvailableTickets
+from ticketGrabUtils import getAvailableTickets, parseTicketDictionary
 from ticketAlerts import startTicketAlerts
 import time
 
@@ -11,14 +11,10 @@ BETWEEN_EVENT_PAUSE_TIME = 2
 
 print("Running for:", list(TICKETS.keys()))
 
-def parseTicketDictionary(ticketDetailDict):
-    url = ticketDetailDict['url']
-    ignoreTickets = ticketDetailDict['ignoreTickets']
-    expectedNumberTickets = ticketDetailDict['expectedNumberTickets']
-    return url, ignoreTickets, expectedNumberTickets
-
 def startTicketSearchLoop():
     loopCount = 0
+    playAlert = True
+
     while True:
         loopCount += 1
         print("Starting loop number:", loopCount)
@@ -30,18 +26,21 @@ def startTicketSearchLoop():
                 if len(goodTickets) != 0:
                     print("!!! Ticket Found for", eventName)
                     print(goodTickets)
-                    startTicketAlerts()
-                    #TODO add found ticket to logger
+                    
+                    if playAlert:
+                        startTicketAlerts()
+                        playAlert = False
 
-            except Exception as e:
+            except Exception as err:
                 print("Check Page, Error found with", eventName)
-                print(e)
-                startTicketAlerts()
-                #TODO add error to a logger
+                print(str(err))
 
             time.sleep(BETWEEN_EVENT_PAUSE_TIME)
 
         time.sleep(LOOP_PAUSE_TIME)
+
+        if loopCount % 10 == 0:
+            playAlert = True
 
 startTicketSearchLoop()
 
